@@ -1,18 +1,36 @@
 buildscript {
     repositories {
         jcenter()
-        maven { url = "https://files.minecraftforge.net/maven" }
+		mavenCentral()
+		maven {
+			name = "forge" 
+			url = "https://maven.minecraftforge.net" 
+		}
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath("com.anatawa12.forge:ForgeGradle:2.3-1.0.+") {
+            changing = true
+        }
     }
 }
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '1.2.4'
+}
+
 apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
+final commitId
 
-version = "1.1.1"
-group = "com.clussmanproductions.trafficcontrol" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+if (hasProperty("grgit")) { // If there's a valid Git repository, get the latest commit ID
+    commitId = "${grgit.head().abbreviatedId}"
+} else { // Else fall back to NOGIT
+    commitId = "NOGIT"
+}
+
+version = "1.0"
+group = "com.yourname.modid" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "trafficcontrol"
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
@@ -21,7 +39,7 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.5.2847"
+    version = "1.12.2-14.23.5.2820"
     runDir = "run"
     
     // the mappings can be changed at any time, and must be in the following format.
@@ -33,10 +51,9 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
-repositories {
-	maven {
-		url = "https://cursemaven.com"
-	}
+repositories
+{
+	maven { url = "https://cursemaven.com" }
 }
 
 dependencies {
@@ -44,7 +61,7 @@ dependencies {
     // or you may define them like so..
     //compile "some.group:artifact:version:classifier"
     //compile "some.group:artifact:version"
-      
+          
     // real examples
     //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
     //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
@@ -61,10 +78,34 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
-	provided 'curse.maven:opencomputers-223008:4630537'
-	compile 'curse.maven:immersiverailroading-277736:4970105'
-	compile 'curse.maven:umc-371784:4975229'
-	compile 'curse.maven:trackapi-282613:2825260'
+    // compile "org.apache.httpcomponents:httpclient:4.3.3"
+	// compile "org.apache.httpcomponents:httpcore:4.3.2"
+	// compile "commons-logging:commons-logging:1.1.3"
+	// provided "curse.maven:xnet-260912:2745852"
+	// provided "curse.maven:mcjtylib-233105:2745846"
+	// provided fileTree(dir:'deps',include:'*.jar')
+    provided 'curse.maven:opencomputers-223008:4630537'
+    compile 'curse.maven:immersiverailroading-277736:4970105'
+    compile 'curse.maven:umc-371784:4975229'
+    compile 'curse.maven:trackapi-282613:2825260'
+}
+
+shadowJar {
+    dependencies {
+        include(dependency('org.apache.httpcomponents:httpclient:4.3.3'))
+		include(dependency('org.apache.httpcomponents:httpcore:4.3.2'))
+		include(dependency('commons-logging:commons-logging:1.1.3'))
+    }
+
+    // Relocate http to prevent conflicts with other mods that include it
+    relocate 'org.apache.http', 'com.mesabrook.ib.repack.org.apache.http'
+	relocate 'org.apache.commons.logging', 'com.mesabrook.ib.repack.org.apache.commons.logging'
+
+    classifier '' // Replace the default JAR
+}
+
+reobf {
+    shadowJar {} // Reobfuscate the shadowed JAR
 }
 
 processResources {
@@ -84,4 +125,8 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }
