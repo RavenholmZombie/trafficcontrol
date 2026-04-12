@@ -114,6 +114,9 @@ public class ModBlocks {
 	public static BlockPedestrianButton pedestrian_button;
 	@ObjectHolder("traffic_sensor_right")
 	public static BlockTrafficSensorRight traffic_sensor_right;
+
+	@ObjectHolder("gate_guard")
+	public static BlockGateGuard gate_guard;
 	
 
 	@SideOnly(Side.CLIENT)
@@ -161,6 +164,6 @@ public class ModBlocks {
 		traffic_sensor_right.initModel();
 		traffic_light_6.initModel();
 		vertical_wig_wag.initModel();
-		
+		gate_guard.initModel();
 	}
 }
