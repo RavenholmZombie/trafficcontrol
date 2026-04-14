@@ -34,14 +34,14 @@ public class BlockGateGuard extends Block
         setCreativeTab(ModTrafficControl.CREATIVE_TAB);
     }
 
-    public void initModel()
-    {
-        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), 0, new ModelResourceLocation(getRegistryName(), "inventory"));
-    }
-
-    @Override
-    public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face)
-    {
+	public void initModel()
+	{
+		ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(this), 0, new ModelResourceLocation(getRegistryName(), "inventory"));
+	}
+	
+	@Override
+    public BlockFaceShape getBlockFaceShape(IBlockAccess worldIn, IBlockState state, BlockPos pos, EnumFacing face) 
+	{
         if (face == EnumFacing.UP)
         {
             return BlockFaceShape.UNDEFINED;
@@ -49,49 +49,49 @@ public class BlockGateGuard extends Block
         return super.getBlockFaceShape(worldIn, state, pos, face);
     }
 
-    @Override
-    public boolean isOpaqueCube(IBlockState state) {
-        return false;
-    }
+	@Override
+	public boolean isOpaqueCube(IBlockState state) {
+		return false;
+	}
 
-    @Override
-    public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return false;
-    }
+	@Override
+	public boolean isNormalCube(IBlockState state, IBlockAccess world, BlockPos pos) {
+		return false;
+	}
 
-    @Override
-    public float getAmbientOcclusionLightValue(IBlockState state) {
-        return 1;
-    }
+	@Override
+	public float getAmbientOcclusionLightValue(IBlockState state) {
+		return 1;
+	}
 
-    @Override
-    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        return new AxisAlignedBB(0.3,0,0.3,0.7,1,0.7);
-    }
+	@Override
+	public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+		return new AxisAlignedBB(0.3,0,0.3,0.7,1,0.7);
+	}
 
-    @Override
-    public boolean causesSuffocation(IBlockState state) {
-        return false;
-    }
+	@Override
+	public boolean causesSuffocation(IBlockState state) {
+		return false;
+	}
 
-    @Override
-    protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, ROTATION);
-    }
+	@Override
+	protected BlockStateContainer createBlockState() {
+		return new BlockStateContainer(this, ROTATION);
+	}
 
-    @Override
-    public int getMetaFromState(IBlockState state) {
-        return state.getValue(ROTATION);
-    }
+	@Override
+	public int getMetaFromState(IBlockState state) {
+		return state.getValue(ROTATION);
+	}
 
-    @Override
-    public IBlockState getStateFromMeta(int meta) {
-        return getDefaultState().withProperty(ROTATION, meta);
-    }
+	@Override
+	public IBlockState getStateFromMeta(int meta) {
+		return getDefaultState().withProperty(ROTATION, meta);
+	}
 
-    @Override
-    public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY,
-                                            float hitZ, int meta, EntityLivingBase placer, EnumHand hand) {
-        return getDefaultState().withProperty(ROTATION, CustomAngleCalculator.getRotationForYaw(placer.rotationYaw));
-    }
+	@Override
+	public IBlockState getStateForPlacement(World world, BlockPos pos, EnumFacing facing, float hitX, float hitY,
+			float hitZ, int meta, EntityLivingBase placer, EnumHand hand) {
+		return getDefaultState().withProperty(ROTATION, CustomAngleCalculator.getRotationForYaw(placer.rotationYaw));
+	}
 }

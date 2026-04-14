@@ -32,6 +32,7 @@ tile.trafficcontrol.traffic_sensor_straight.name=Traffic Sensor (Straight)
 tile.trafficcontrol.pedestrian_button.name=Pedestrian Button
 tile.trafficcontrol.traffic_sensor_right.name=Traffic Sensor (Right)
 tile.trafficcontrol.vertical_wig_wag.name=Upper Quadrant Wig Wag
+tile.trafficcontrol.gate_guard.name=Crossing Gate Wind Guard
 
 #items
 item.trafficcontrol.crossing_relay_box.name=Crossing Gate Relay

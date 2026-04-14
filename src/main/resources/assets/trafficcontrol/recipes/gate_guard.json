@@ -1,0 +1,22 @@
+{ 
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " NN",
+    "PN ",
+    " NN"  ],
+  "key": {
+  	"P":
+	{
+		"item": "trafficcontrol:crossing_gate_pole"
+	},
+  	"N":
+	{
+	    "type": "forge:ore_dict",
+	    "ore": "nuggetIron"
+	}
+  },
+  "result": {
+    "item": "trafficcontrol:gate_guard",
+    "count": 1
+  }
+}

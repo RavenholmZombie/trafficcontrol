@@ -232,6 +232,7 @@ public class CommonProxy {
 		e.getRegistry().register(new ItemStreetSign(ModBlocks.street_sign).setRegistryName(ModBlocks.street_sign.getRegistryName()));
 		e.getRegistry().register(new ItemBlock(ModBlocks.pedestrian_button).setRegistryName(ModBlocks.pedestrian_button.getRegistryName()));
 		e.getRegistry().register(new ItemBlock(ModBlocks.traffic_sensor_right).setRegistryName(ModBlocks.traffic_sensor_right.getRegistryName()));
+		e.getRegistry().register(new ItemBlock(ModBlocks.gate_guard).setRegistryName(ModBlocks.gate_guard.getRegistryName()));
 	}
 
 	@SubscribeEvent
