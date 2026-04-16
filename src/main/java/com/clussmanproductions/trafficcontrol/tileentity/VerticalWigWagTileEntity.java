@@ -118,8 +118,16 @@ public class VerticalWigWagTileEntity extends TileEntity implements ITickable
 	}
 
 	public void setActive(boolean active) {
+		if (this.active == active)
+		{
+			return;
+		}
 		this.active = active;
 		markDirty();
+		if (world != null && !world.isRemote)
+		{
+			world.notifyBlockUpdate(pos, world.getBlockState(pos), world.getBlockState(pos), 3);
+		}
 	}
 	
 	@Override

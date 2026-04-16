@@ -55,20 +55,33 @@ public class RendererWigWag extends TileEntitySpecialRenderer<WigWagTileEntity> 
 				
 				GlStateManager.pushMatrix();
 
-				// Move to block center FIRST
-				GlStateManager.translate(x + 0.53, y + 0.06, z + 0.71);
-
-				// Apply ALL world rotations here
+				// Same pivot as the baked wig_wag model: rotate around block center (not an off-center
+				// point), so the arm assembly stays locked to the mast at every placement rotation.
+				GlStateManager.translate(x + 0.5, y + 0.545, z + 0.5);
 				GlStateManager.rotate(state.getValue(BlockWigWag.ROTATION) * -22.5F, 0, 1, 0);
+				GlStateManager.translate(-0.5, -0.5, -0.5);
+				// Legacy TESR anchor vs center (old: translate(0.53,0.06,0.71) then (-0.5,0,-0.5) at 0°).
+				GlStateManager.translate(0.03F, 0.06F, 0.21F);
 
-				// Move back to block-local origin
-				GlStateManager.translate(-0.5, 0, -0.5);
-
-				// ---- NOW do your arm pivot stuff ----
 				GlStateManager.translate(bcwc(-3.5), bcwc(16.5), bcwc(7.5));
 				GlStateManager.rotate(180F, 0, 0, 1);
+
+				// Pivot at top of mount / rod joint (model Y = 0.45). Side-to-side = rotate about Z.
+				// Apply once, then draw mount + swinging parts so the whole arm assembly moves together.
+				final float pivotY = (float) bcwc(0.45);
+				GlStateManager.translate(0, pivotY, 0);
 				GlStateManager.rotate(te.getRotation(), 0, 0, 1);
-				GlStateManager.translate(bcwc(0), bcwc(0), bcwc(0));
+				GlStateManager.translate(0, -pivotY, 0);
+
+				Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+				Tessellator armTess = Tessellator.getInstance();
+				BufferBuilder armBuilder = armTess.getBuffer();
+				IBakedModel mountModel = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes()
+						.getModelManager()
+						.getModel(new ModelResourceLocation(ModTrafficControl.MODID + ":wig_wag_arm_mount", "normal"));
+				armBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
+				addBakedQuads(armBuilder, mountModel, state);
+				armTess.draw();
 
 				
 				// Tessellator tessellator = Tessellator.getInstance();
@@ -90,23 +103,23 @@ public class RendererWigWag extends TileEntitySpecialRenderer<WigWagTileEntity> 
 				// renderLamp(builder, te.isActive());
 				// tessellator.draw();
 
-				Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-				Tessellator armTess = Tessellator.getInstance();
-				BufferBuilder armBuilder = armTess.getBuffer();
 				armBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.ITEM);
 				String variant = te.isActive() ? "lamp=on" : "lamp=off";
 				IBakedModel armModel = Minecraft.getMinecraft().getBlockRendererDispatcher().getBlockModelShapes()
 						.getModelManager()
 						.getModel(new ModelResourceLocation(ModTrafficControl.MODID + ":wig_wag_arm", variant));
-				for (EnumFacing facing : facings) {
-					for (BakedQuad quad : armModel.getQuads(state, facing, 0)) {
-						armBuilder.addVertexData(quad.getVertexData());
-						
-					}
-				}
+				addBakedQuads(armBuilder, armModel, state);
 				armTess.draw();
 
 				GlStateManager.popMatrix();
+	}
+
+	private void addBakedQuads(BufferBuilder armBuilder, IBakedModel model, IBlockState state) {
+		for (EnumFacing facing : facings) {
+			for (BakedQuad quad : model.getQuads(state, facing, 0)) {
+				armBuilder.addVertexData(quad.getVertexData());
+			}
+		}
 	}
 
 	private void renderSuspendedPole(BufferBuilder builder) {
