@@ -39,6 +39,7 @@ import com.clussmanproductions.trafficcontrol.tileentity.SignTileEntity;
 import com.clussmanproductions.trafficcontrol.tileentity.StreetLightDoubleTileEntity;
 import com.clussmanproductions.trafficcontrol.tileentity.StreetLightSingleTileEntity;
 import com.clussmanproductions.trafficcontrol.tileentity.StreetSignTileEntity;
+import com.clussmanproductions.trafficcontrol.tileentity.TeardropBellTileEntity;
 import com.clussmanproductions.trafficcontrol.tileentity.TrafficLight1TileEntity;
 import com.clussmanproductions.trafficcontrol.tileentity.TrafficLight2TileEntity;
 import com.clussmanproductions.trafficcontrol.tileentity.TrafficLight4TileEntity;
@@ -133,6 +134,7 @@ public class CommonProxy {
 		e.getRegistry().register(new BlockVerticalWigWag());
 		e.getRegistry().register(new BlockWCHMechanicalBell());
 		e.getRegistry().register(new BlockGateGuard());
+		e.getRegistry().register(new BlockTeardropBell());
 
 		GameRegistry.registerTileEntity(CrossingGateGateTileEntity.class, ModTrafficControl.MODID + "_crossinggategate");
 		GameRegistry.registerTileEntity(SafetranType3TileEntity.class, ModTrafficControl.MODID + "_safetrantyp3");
@@ -160,6 +162,7 @@ public class CommonProxy {
 		GameRegistry.registerTileEntity(TrafficLight6TileEntity.class, ModTrafficControl.MODID + "_trafficlight6");
 		GameRegistry.registerTileEntity(PedestrianButtonTileEntity.class, ModTrafficControl.MODID + "_pedestrianbutton");
 		GameRegistry.registerTileEntity(VerticalWigWagTileEntity.class, ModTrafficControl.MODID + "_verticalwigwag");
+		GameRegistry.registerTileEntity(TeardropBellTileEntity.class, ModTrafficControl.MODID + "_teardropbell");
 	}
 
 	@SubscribeEvent
@@ -233,6 +236,7 @@ public class CommonProxy {
 		e.getRegistry().register(new ItemBlock(ModBlocks.pedestrian_button).setRegistryName(ModBlocks.pedestrian_button.getRegistryName()));
 		e.getRegistry().register(new ItemBlock(ModBlocks.traffic_sensor_right).setRegistryName(ModBlocks.traffic_sensor_right.getRegistryName()));
 		e.getRegistry().register(new ItemBlock(ModBlocks.gate_guard).setRegistryName(ModBlocks.gate_guard.getRegistryName()));
+		e.getRegistry().register(new ItemBlock(ModBlocks.teardrop_bell).setRegistryName(ModBlocks.teardrop_bell.getRegistryName()));
 	}
 
 	@SubscribeEvent
@@ -246,6 +250,7 @@ public class CommonProxy {
 		e.getRegistry().register(ModSounds.wigWag);
 		e.getRegistry().register(ModSounds.wch_mechanical_bell);
 		e.getRegistry().register(ModSounds.screwdriver);
+		e.getRegistry().register(ModSounds.teardrop_bell);
 	}
 
 	public void preInit(FMLPreInitializationEvent e)

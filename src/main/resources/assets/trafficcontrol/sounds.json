@@ -14,6 +14,16 @@
         "category": "block",
         "sounds": [ "trafficcontrol:safetran_type_3" ]
     },
+    "safetran_type_1":
+    {
+        "category": "block",
+        "sounds": [ "trafficcontrol:safetran_type_1" ]
+    },
+    "teardrop_bell":
+    {
+        "category": "block",
+        "sounds": [ "trafficcontrol:teardrop_bell" ]
+    },
     "safetran_mechanical":
     {
         "category": "block",

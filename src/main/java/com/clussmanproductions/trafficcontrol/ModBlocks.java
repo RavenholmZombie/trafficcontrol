@@ -89,6 +89,9 @@ public class ModBlocks {
 	public static BlockWCHBell wch_bell;
 	@ObjectHolder("wch_mechanical_bell")
 	public static BlockWCHMechanicalBell wch_mechanical_bell;
+	@ObjectHolder("teardrop_bell")
+	public static BlockTeardropBell teardrop_bell;
+	
 	@ObjectHolder("traffic_sensor_left")
 	public static BlockTrafficSensorLeft traffic_sensor_left;
 	@ObjectHolder("traffic_sensor_straight")
@@ -165,5 +168,6 @@ public class ModBlocks {
 		traffic_light_6.initModel();
 		vertical_wig_wag.initModel();
 		gate_guard.initModel();
+		teardrop_bell.initModel();
 	}
 }
