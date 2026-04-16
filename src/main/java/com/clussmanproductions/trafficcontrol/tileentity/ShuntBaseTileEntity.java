@@ -10,7 +10,6 @@ import com.clussmanproductions.trafficcontrol.util.ImmersiveRailroadingHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -84,9 +83,9 @@ public abstract class ShuntBaseTileEntity extends TileEntity {
 		}
 	}
 
-	public boolean setOrigin(EnumFacing facing)
+	public boolean setOrigin()
 	{
-		Vec3d origin = ImmersiveRailroadingHelper.findOrigin(getPos(), facing, world);
+		Vec3d origin = ImmersiveRailroadingHelper.findOrigin(getPos(), world);
 		trackOrigin = new BlockPos(origin.x, origin.y, origin.z);
 		
 		return trackOrigin.getY() != -1;

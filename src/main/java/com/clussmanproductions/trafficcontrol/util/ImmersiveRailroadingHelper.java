@@ -10,7 +10,6 @@ import com.google.common.collect.ImmutableList;
 import cam72cam.immersiverailroading.entity.EntityMoveableRollingStock;
 import cam72cam.immersiverailroading.thirdparty.trackapi.ITrack;
 import cam72cam.mod.entity.ModdedEntity;
-import cam72cam.mod.math.Vec3i;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.Tuple;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -19,42 +18,54 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class ImmersiveRailroadingHelper {
-	public static Vec3d findOrigin(BlockPos currentPos, EnumFacing signalFacing, World world)
+	public static Vec3d findOrigin(BlockPos currentPos, World world)
 	{
-		Vec3d retVal = new Vec3d(0, -1, 0);
 		cam72cam.mod.world.World camWorld = cam72cam.mod.world.World.get(world);
 		
-		EnumFacing searchDirection = signalFacing.rotateY().rotateY().rotateY();
+		double bestDistSq = Double.MAX_VALUE;
+		Vec3d bestCenter = null;
+		double refX = currentPos.getX() + 0.5;
+		double refY = currentPos.getY() + 0.5;
+		double refZ = currentPos.getZ() + 0.5;
 		
-		BlockPos workingPos = new BlockPos(currentPos.getX(), currentPos.getY() - 3, currentPos.getZ());
-		for(int y = 0; y < 6; y++)
+		for (int dy = -3; dy <= 2; dy++)
 		{
-			for(int i = 0; i <= 10; i++)
+			BlockPos columnBase = new BlockPos(currentPos.getX(), currentPos.getY() + dy, currentPos.getZ());
+			for (EnumFacing dir : EnumFacing.Plane.HORIZONTAL)
 			{
-				workingPos = workingPos.offset(searchDirection);
-				cam72cam.mod.math.Vec3d workingPosVec3d = new cam72cam.mod.math.Vec3d(workingPos.getX(), workingPos.getY(), workingPos.getZ());
-				ITrack tile = ITrack.get(camWorld, workingPosVec3d, false);
-                if (tile == null)
-                {
-                    continue;
-                }
-
-                cam72cam.mod.math.Vec3d current = workingPosVec3d;
-
-                cam72cam.mod.math.Vec3d center = tile.getNextPosition(current, new cam72cam.mod.math.Vec3d(0, 0, 0));
-
-                retVal = new Vec3d(center.x, center.y, center.z);
-                break;
+				for (int i = 0; i <= 10; i++)
+				{
+					BlockPos workingPos = columnBase.offset(dir, i);
+					cam72cam.mod.math.Vec3d workingPosVec3d = new cam72cam.mod.math.Vec3d(workingPos.getX(), workingPos.getY(), workingPos.getZ());
+					ITrack tile = ITrack.get(camWorld, workingPosVec3d, false);
+					if (tile == null)
+					{
+						continue;
+					}
+					
+					cam72cam.mod.math.Vec3d center = tile.getNextPosition(workingPosVec3d, new cam72cam.mod.math.Vec3d(0, 0, 0));
+					double cx = center.x;
+					double cy = center.y;
+					double cz = center.z;
+					double dx = cx - refX;
+					double dyv = cy - refY;
+					double dz = cz - refZ;
+					double distSq = dx * dx + dyv * dyv + dz * dz;
+					if (distSq < bestDistSq)
+					{
+						bestDistSq = distSq;
+						bestCenter = new Vec3d(cx, cy, cz);
+					}
+				}
 			}
-			
-			if (retVal.y != -1)
-			{
-				break;
-			}
-			workingPos = new BlockPos(currentPos.getX(), currentPos.getY() + 1, currentPos.getZ());
 		}
 		
-		return retVal;
+		if (bestCenter == null)
+		{
+			return new Vec3d(0, -1, 0);
+		}
+		
+		return bestCenter;
 	}
 	
 	public static Vec3d getNextPosition(Vec3d currentPosition, Vec3d motion, World world)

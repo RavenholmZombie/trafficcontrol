@@ -4,6 +4,8 @@ import java.util.Random;
 
 import com.clussmanproductions.trafficcontrol.ModItems;
 import com.clussmanproductions.trafficcontrol.ModTrafficControl;
+import com.clussmanproductions.trafficcontrol.gui.GuiProxy;
+import com.clussmanproductions.trafficcontrol.item.ItemCrossingRelayTuner;
 import com.clussmanproductions.trafficcontrol.tileentity.RelayTileEntity;
 
 import net.minecraft.block.Block;
@@ -164,6 +166,21 @@ public abstract class BlockRelayBase extends Block implements ITileEntityProvide
 	public TileEntity createNewTileEntity(World worldIn, int meta) {
 		return new RelayTileEntity();
 	}
+
+	@Override
+	public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn,
+			EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+		
+		if (playerIn.getHeldItem(hand).getItem() instanceof ItemCrossingRelayTuner )
+		{
+			return super.onBlockActivated(worldIn, pos, state, playerIn, hand, facing, hitX, hitY, hitZ);
+		}
+		
+		playerIn.openGui(ModTrafficControl.instance, GuiProxy.GUI_IDs.CROSSING_RELAY_SETTINGS, worldIn, pos.getX(), pos.getY(), pos.getZ());
+		return true;
+	}
+
+	
 
 	@Override
 	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {

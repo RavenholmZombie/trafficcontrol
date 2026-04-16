@@ -96,5 +96,8 @@ trafficcontrol.tooltip.tuner=Use to link components to Crossing Gate Relays or T
 trafficcontrol.tooltip.crossingrelay=Uses Shunts or Redstone to control crossing components.
 trafficcontrol.tooltip.trafficbox=Uses Redstone or Traffic Sensors to control traffic signal components.
 trafficcontrol.tooltip.cone=Can be worn as a hat.
-trafficcontrol.tooltip.screwdriver=Can be used to rotate Traffic Control blocks. Use while sneaking to rotate in the opposite direction.
+trafficcontrol.tooltip.screwdriver=Can be used to rotate Traffic Control blocks. Use while sneaking to rotate in the opposite direction. Right-click a crossing relay with an empty hand (not the tuner) to open bell timing.
+
+trafficcontrol.gui.relay.title=Crossing relay
+trafficcontrol.gui.relay.bellstop=Bell stop after (seconds). 0 = ring until crossing clears
 trafficcontrol.tooltip.help=[Press SHIFT for more info]

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.clussmanproductions.trafficcontrol.Config;
 import com.clussmanproductions.trafficcontrol.ModBlocks;
 import com.clussmanproductions.trafficcontrol.ModTrafficControl;
 import com.clussmanproductions.trafficcontrol.blocks.BlockLampBase.EnumState;
@@ -20,13 +21,15 @@ import com.clussmanproductions.trafficcontrol.util.Tuple;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class RelayTileEntity extends TileEntity implements ITickable, IScannerSubscriber, IHasRotationProperty { // implements IHasRotationProperty to *prevent* rotation
+public class RelayTileEntity extends SyncableTileEntity implements ITickable, IScannerSubscriber, IHasRotationProperty { // implements IHasRotationProperty to *prevent* rotation
 	
 	private boolean isMaster;
 	private boolean isPowered;
@@ -61,9 +64,11 @@ public class RelayTileEntity extends TileEntity implements ITickable, IScannerSu
 	private HashMap<BlockPos, Integer> invalidCrossingGates = new HashMap<>();
 	private HashMap<BlockPos, Integer> invalidBells = new HashMap<>();
 	private int lastHeartbeat;
+	private long crossingBellStartWorldTime = -1L;
+	private int relayBellStopAfterSeconds;
 	
 	public RelayTileEntity() {
-
+		relayBellStopAfterSeconds = Config.crossingBellStopAfterSeconds;
 	}
 
 	@Override
@@ -85,6 +90,8 @@ public class RelayTileEntity extends TileEntity implements ITickable, IScannerSu
 		
 		// Bell information
 		alreadyNotifiedBells = compound.getBoolean("alreadynotifiedbells");
+		crossingBellStartWorldTime = compound.hasKey("crossingbellstart") ? compound.getLong("crossingbellstart") : -1L;
+		relayBellStopAfterSeconds = compound.hasKey("relaybellstop") ? compound.getInteger("relaybellstop") : Config.crossingBellStopAfterSeconds;
 
 		fillArrayListFromNBT("lamps", crossingLampLocations, compound);
 		fillArrayListFromNBT("gate", crossingGateLocations, compound);
@@ -148,6 +155,8 @@ public class RelayTileEntity extends TileEntity implements ITickable, IScannerSu
 		
 		// Bell information
 		nbt.setBoolean("alreadynotifiedbells", alreadyNotifiedBells);
+		nbt.setLong("crossingbellstart", crossingBellStartWorldTime);
+		nbt.setInteger("relaybellstop", relayBellStopAfterSeconds);
 		
 		// Wig Wag information
 		nbt.setBoolean("alreadynotifiedwigwags", alreadyNotifiedWigWags);
@@ -211,6 +220,23 @@ public class RelayTileEntity extends TileEntity implements ITickable, IScannerSu
 		if (world.isRemote || !isMaster)
 		{
 			return;
+		}
+		
+		if (getPowered())
+		{
+			if (crossingBellStartWorldTime < 0L)
+			{
+				crossingBellStartWorldTime = world.getTotalWorldTime();
+				markDirty();
+			}
+		}
+		else
+		{
+			if (crossingBellStartWorldTime >= 0L)
+			{
+				crossingBellStartWorldTime = -1L;
+				markDirty();
+			}
 		}
 		
 		if (lastHeartbeat >= 20)
@@ -387,9 +413,28 @@ public class RelayTileEntity extends TileEntity implements ITickable, IScannerSu
 		}
 	}
 	
+	private boolean shouldBellsRing()
+	{
+		if (!getPowered())
+		{
+			return false;
+		}
+		if (relayBellStopAfterSeconds <= 0)
+		{
+			return true;
+		}
+		if (crossingBellStartWorldTime < 0L)
+		{
+			return true;
+		}
+		return world.getTotalWorldTime() - crossingBellStartWorldTime < (long) relayBellStopAfterSeconds * 20L;
+	}
+	
 	private boolean updateBells()
 	{
 		boolean markDirty = false;
+		boolean ring = shouldBellsRing();
+		boolean bellNeedsEveryTick = relayBellStopAfterSeconds > 0;
 		for(BlockPos bellPos : bellLocations)
 		{
 			TileEntity te = world.getTileEntity(bellPos);
@@ -412,11 +457,19 @@ public class RelayTileEntity extends TileEntity implements ITickable, IScannerSu
 				invalidBells.remove(bellPos);
 			}
 			
-			if (!alreadyNotifiedBells)
+			if (bellNeedsEveryTick || !alreadyNotifiedBells)
 			{
 				BellBaseTileEntity bell = (BellBaseTileEntity)te;
-				bell.setIsRinging(getPowered());
-				markDirty = true;
+				boolean wantRing = ring;
+				if (getPowered() && relayBellStopAfterSeconds > 0 && !ring && !bell.isAffectedByRelayBellStopTimer())
+				{
+					wantRing = true;
+				}
+				if (bell.getIsRinging() != wantRing)
+				{
+					bell.setIsRinging(wantRing);
+					markDirty = true;
+				}
 			}
 		}
 		
@@ -549,6 +602,152 @@ public class RelayTileEntity extends TileEntity implements ITickable, IScannerSu
 		}
 
 		return (RelayTileEntity) master;
+	}
+
+	public boolean isMasterRelay() {
+		return isMaster;
+	}
+
+	public int getRelayBellStopAfterSeconds() {
+		RelayTileEntity master = isMaster ? this : getMaster(world);
+		if (master != null) {
+			return master.relayBellStopAfterSeconds;
+		}
+		return relayBellStopAfterSeconds;
+	}
+
+	public void setRelayBellStopAfterSeconds(int sec) {
+		sec = Math.max(0, Math.min(3600, sec));
+		RelayTileEntity master = isMaster ? this : getMaster(world);
+		if (master != null) {
+			master.applyRelayBellStopToFullMultiblock(sec);
+		} else {
+			applyRelayBellStopLocal(sec);
+		}
+	}
+
+	/** Same walk as {@link com.clussmanproductions.trafficcontrol.item.ItemCrossingRelayBox#placeMultiblock}. */
+	private List<BlockPos> enumerateRelayMultiblockParts() {
+		List<BlockPos> list = new ArrayList<>(8);
+		if (world == null) {
+			list.add(pos);
+			return list;
+		}
+		IBlockState st = world.getBlockState(pos);
+		if (!(st.getBlock() instanceof BlockRelayBase)) {
+			list.add(pos);
+			return list;
+		}
+		EnumFacing facing = st.getValue(BlockRelayBase.FACING);
+		BlockPos p = pos;
+		EnumFacing lastFacing = facing;
+		list.add(p);
+		lastFacing = relayMultiblockRotateLeft(lastFacing);
+		p = p.offset(lastFacing);
+		list.add(p);
+		lastFacing = relayMultiblockRotateRight(lastFacing);
+		p = p.offset(lastFacing);
+		list.add(p);
+		lastFacing = relayMultiblockRotateRight(lastFacing);
+		p = p.offset(lastFacing);
+		list.add(p);
+		p = p.offset(EnumFacing.UP);
+		list.add(p);
+		lastFacing = relayMultiblockRotateRight(lastFacing);
+		p = p.offset(lastFacing);
+		list.add(p);
+		lastFacing = relayMultiblockRotateRight(lastFacing);
+		p = p.offset(lastFacing);
+		list.add(p);
+		lastFacing = relayMultiblockRotateRight(lastFacing);
+		p = p.offset(lastFacing);
+		list.add(p);
+		return list;
+	}
+
+	private static EnumFacing relayMultiblockRotateLeft(EnumFacing in) {
+		switch (in) {
+		case NORTH:
+			return EnumFacing.WEST;
+		case WEST:
+			return EnumFacing.SOUTH;
+		case SOUTH:
+			return EnumFacing.EAST;
+		case EAST:
+			return EnumFacing.NORTH;
+		default:
+			return in;
+		}
+	}
+
+	private static EnumFacing relayMultiblockRotateRight(EnumFacing in) {
+		switch (in) {
+		case NORTH:
+			return EnumFacing.EAST;
+		case EAST:
+			return EnumFacing.SOUTH;
+		case SOUTH:
+			return EnumFacing.WEST;
+		case WEST:
+			return EnumFacing.NORTH;
+		default:
+			return in;
+		}
+	}
+
+	private void applyRelayBellStopToFullMultiblock(int sec) {
+		if (!isMaster) {
+			RelayTileEntity m = getMaster(world);
+			if (m != null) {
+				m.applyRelayBellStopToFullMultiblock(sec);
+			} else {
+				applyRelayBellStopLocal(sec);
+			}
+			return;
+		}
+		for (BlockPos partPos : enumerateRelayMultiblockParts()) {
+			TileEntity t = world.getTileEntity(partPos);
+			if (t instanceof RelayTileEntity) {
+				((RelayTileEntity) t).applyRelayBellStopLocal(sec);
+			}
+		}
+	}
+
+	private void applyRelayBellStopLocal(int sec) {
+		if (relayBellStopAfterSeconds == sec) {
+			return;
+		}
+		relayBellStopAfterSeconds = sec;
+		markDirty();
+		if (world != null && !world.isRemote) {
+			IBlockState st = world.getBlockState(pos);
+			world.notifyBlockUpdate(pos, st, st, 3);
+		}
+	}
+
+	@Override
+	public NBTTagCompound getUpdateTag() {
+		NBTTagCompound tag = super.getUpdateTag();
+		tag.setInteger("relaybellstop", relayBellStopAfterSeconds);
+		return tag;
+	}
+
+	@Override
+	public void handleUpdateTag(NBTTagCompound tag) {
+		super.handleUpdateTag(tag);
+		if (tag.hasKey("relaybellstop")) {
+			relayBellStopAfterSeconds = tag.getInteger("relaybellstop");
+		}
+	}
+
+	@Override
+	public SPacketUpdateTileEntity getUpdatePacket() {
+		return new SPacketUpdateTileEntity(getPos(), 2, getUpdateTag());
+	}
+
+	@Override
+	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+		handleUpdateTag(pkt.getNbtCompound());
 	}
 
 	private BlockPos getMasterBlockPos() {
@@ -824,6 +1023,25 @@ public class RelayTileEntity extends TileEntity implements ITickable, IScannerSu
 	@Override
 	public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newSate) {
 		return !(newSate.getBlock() instanceof BlockRelayBase);
+	}
+
+	@Override
+	public NBTTagCompound getClientToServerUpdateTag() {
+		NBTTagCompound tag = new NBTTagCompound();
+		tag.setInteger("relaybellstop", relayBellStopAfterSeconds);
+		return tag;
+	}
+
+	@Override
+	public void handleClientToServerUpdateTag(NBTTagCompound compound) {
+		if (!compound.hasKey("relaybellstop")) {
+			return;
+		}
+		RelayTileEntity master = getMaster(world);
+		if (master == null) {
+			return;
+		}
+		master.setRelayBellStopAfterSeconds(compound.getInteger("relaybellstop"));
 	}
 
 }

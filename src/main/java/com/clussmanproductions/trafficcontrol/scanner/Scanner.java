@@ -13,7 +13,6 @@ import com.clussmanproductions.trafficcontrol.util.ImmersiveRailroadingHelper;
 import com.clussmanproductions.trafficcontrol.util.Tuple;
 
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -252,15 +251,22 @@ public class Scanner
 		{
 			Vec3d stockVelocity = moveableRollingStockNearby.getSecond();
 			
-			if (stockVelocity.x == 0 && stockVelocity.y == 0 && stockVelocity.z == 0)
+			double velLenSq = stockVelocity.x * stockVelocity.x + stockVelocity.y * stockVelocity.y + stockVelocity.z * stockVelocity.z;
+			if (velLenSq < 1e-8)
 			{
 				return new Tuple<Boolean, Boolean>(true, false);
 			}
 			
-			EnumFacing stockMovementFacing = EnumFacing.getFacingFromVector((float)stockVelocity.x, (float)stockVelocity.y, (float)stockVelocity.z);
-			EnumFacing motionFacing = EnumFacing.getFacingFromVector((float)motion.x, (float)motion.y, (float)motion.z);
+			double motionLenSq = motion.x * motion.x + motion.y * motion.y + motion.z * motion.z;
+			if (motionLenSq < 1e-8)
+			{
+				return new Tuple<Boolean, Boolean>(true, false);
+			}
 			
-			boolean trainMovingTowardsDestination = motionFacing.equals(stockMovementFacing);
+			// Dot product: same as comparing EnumFacing for axis-aligned motion, but works on curves
+			// and diagonal IR velocities where getFacingFromVector picks the wrong axis.
+			double dot = motion.x * stockVelocity.x + motion.y * stockVelocity.y + motion.z * stockVelocity.z;
+			boolean trainMovingTowardsDestination = dot > 1e-6;
 			return new Tuple<Boolean, Boolean>(true, trainMovingTowardsDestination);
 		}
 		

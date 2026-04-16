@@ -131,7 +131,7 @@ public abstract class BlockShuntBase extends Block implements ITileEntityProvide
 		}
 		
 		ShuntBaseTileEntity te = (ShuntBaseTileEntity)worldIn.getTileEntity(pos);
-		if (!te.setOrigin(placer.getHorizontalFacing()))
+		if (!te.setOrigin())
 		{
 			placer.sendMessage(new TextComponentString("WARNING - no track found nearby"));
 		}

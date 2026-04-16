@@ -30,6 +30,19 @@ public abstract class BellBaseTileEntity extends TileEntity implements ILoopable
 		return nbt;
 	}
 	
+	public boolean getIsRinging()
+	{
+		return isRinging;
+	}
+
+	/**
+	 * When false, crossing relay "bell stop after" timers do not silence this bell;
+	 * it keeps ringing for the full time the crossing is active (still off when unpowered).
+	 */
+	public boolean isAffectedByRelayBellStopTimer() {
+		return true;
+	}
+	
 	public void setIsRinging(boolean ringing)
 	{
 		this.isRinging = ringing;

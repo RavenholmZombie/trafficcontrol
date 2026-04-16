@@ -14,6 +14,7 @@ public class Config {
 	public static int borderTimeout = 150;
 	public static int borderTick = 10; 
 	public static int parallelScans = 1;
+	public static int crossingBellStopAfterSeconds = 0;
 	public static int tooltipCharWrapLength = 256;
 	public static String[] sensorClasses = new String[] 
 			{
@@ -66,6 +67,7 @@ public class Config {
 		sensorClasses = cfg.getStringList("sensorClasses", CATEGORY_TRAFFIC_LIGHT, sensorClasses, "What entity classes will activate the traffic signal sensors?");
 		sensorScanHeight = cfg.getInt("sensorScanHeight", CATEGORY_TRAFFIC_LIGHT, sensorScanHeight, 0, 10, "How far up (in blocks) should traffic signal sensors scan for entities? [Min = 0, Max = 10, Default = 5]");
 		parallelScans = cfg.getInt("parallelScans", CATEGORY_GENERAL, parallelScans, 1, 20, "How many crossing relay boxes should be scanned per tick?  PERFORMANCE NOTE: Total blocks scanned = borderTick * parallelScans.  The higher this number, the amount of blocks scanned per tick is multiplied.");
+		crossingBellStopAfterSeconds = cfg.getInt("crossingBellStopAfterSeconds", CATEGORY_GENERAL, crossingBellStopAfterSeconds, 0, 3600, "Default bell stop time (seconds) for crossing relays that have not been set in-game (right-click relay with empty hand). 0 = bells stay on until the crossing clears. Per-relay value overrides this.");
 		tooltipCharWrapLength = cfg.getInt("tooltipCharWrapLength", CATEGORY_GENERAL, tooltipCharWrapLength, 64, 5412, "How many letters should be rendered in a tooltip before it wraps down to the next line?");
 		trafficLightCardT1Capacity = cfg.getInt("trafficLightCardT1Capacity", CATEGORY_TRAFFIC_LIGHT, trafficLightCardT1Capacity, 1, Integer.MAX_VALUE, "How many traffic lights should be allowed to be paired with a Tier 1 Traffic Light Card?");
 		trafficLightCardT2Capacity = cfg.getInt("trafficLightCardT2Capacity", CATEGORY_TRAFFIC_LIGHT, trafficLightCardT2Capacity, 1, Integer.MAX_VALUE, "How many traffic lights should be allowed to be paired with a Tier 2 Traffic Light Card?");

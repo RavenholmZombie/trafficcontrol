@@ -10,14 +10,19 @@ import com.clussmanproductions.trafficcontrol.util.ILoopableSoundTileEntity;
 import com.clussmanproductions.trafficcontrol.util.LoopableTileEntitySound;
 import com.clussmanproductions.trafficcontrol.util.NBTUtils;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -34,7 +39,23 @@ public class CrossingGateGateTileEntity extends SyncableTileEntity implements IT
 	private float delay = 4;
 	private float lightStartOffset = 1;
 	private GateLightCount gateLightCount = GateLightCount.ThreeLights;
-	
+
+	/** World positions where we last placed (or could place) barriers; used to remove stale blocks when length or state changes. */
+	private final Set<BlockPos> lastBarrierSlots = new HashSet<>();
+
+	/**
+	 * Barriers spawn while the arm is low enough to block (gate rotation moves from about -60 open toward 0 closed).
+	 */
+	private static final float BARRIER_ARM_ON_THRESHOLD = -32.0F;
+
+	private static final double BARRIER_SAMPLE_STEP_MODEL = 16.0;
+
+	/**
+	 * When true, barriers run along negative model X (striped boom away from the mechanism in default TESR). When
+	 * false, along positive X only.
+	 */
+	private static final boolean BARRIER_BOOM_ON_NEGATIVE_X_SIDE = true;
+
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
 		compound.setFloat("gateRotation", gateRotation);
@@ -224,8 +245,110 @@ public class CrossingGateGateTileEntity extends SyncableTileEntity implements IT
 				}
 				break;
 			default:
-				return;
+				break;
 		}
+
+		if (!world.isRemote)
+		{
+			syncGateBarrierBlocks();
+		}
+	}
+
+	private void syncGateBarrierBlocks()
+	{
+		Set<BlockPos> desired = computeBarrierSlotsClosed();
+		boolean armDown = gateRotation > BARRIER_ARM_ON_THRESHOLD;
+		Set<BlockPos> previous = new HashSet<>(lastBarrierSlots);
+
+		if (armDown)
+		{
+			for (BlockPos p : desired)
+			{
+				if (world.isAirBlock(p))
+				{
+					world.setBlockState(p, Blocks.BARRIER.getDefaultState(), 3);
+				}
+			}
+		}
+
+		for (BlockPos p : previous)
+		{
+			boolean keep = armDown && desired.contains(p);
+			if (!keep && world.getBlockState(p).getBlock() == Blocks.BARRIER)
+			{
+				world.setBlockToAir(p);
+			}
+		}
+
+		lastBarrierSlots.clear();
+		lastBarrierSlots.addAll(desired);
+	}
+
+	/**
+	 * Footprint of the gate arm when fully closed, at this block's Y (matches renderer arm box, horizontal).
+	 */
+	private Set<BlockPos> computeBarrierSlotsClosed()
+	{
+		Set<BlockPos> out = new HashSet<>();
+		IBlockState blockState = world.getBlockState(pos);
+		if (!(blockState.getBlock() instanceof BlockCrossingGateGate))
+		{
+			return out;
+		}
+
+		int rot = blockState.getValue(BlockCrossingGateGate.ROTATION);
+		double facingRad = Math.toRadians(-rot * 22.5F);
+		double cosF = Math.cos(facingRad);
+		double sinF = Math.sin(facingRad);
+		double cx = pos.getX() + 0.5;
+		double cz = pos.getZ() + 0.5;
+		int gateY = pos.getY();
+
+		double minXModel = -(crossingGateLength * 16.0) - 13.0;
+		double maxXModel = (crossingGateLength * 16.0) + 5.5;
+		double mxLo;
+		double mxHi;
+		if (BARRIER_BOOM_ON_NEGATIVE_X_SIDE)
+		{
+			mxLo = minXModel;
+			mxHi = Math.min(maxXModel, 0.0);
+		}
+		else
+		{
+			mxLo = Math.max(minXModel, 0.0);
+			mxHi = maxXModel;
+		}
+
+		for (double mx = mxLo; mx <= mxHi; mx += BARRIER_SAMPLE_STEP_MODEL)
+		{
+			double x3 = (mx + 3.0) * (1.0 / 16.0);
+			double wx = x3 * cosF + cx;
+			double wz = -x3 * sinF + cz;
+			BlockPos bp = new BlockPos(MathHelper.floor(wx), gateY, MathHelper.floor(wz));
+			if (!bp.equals(pos))
+			{
+				out.add(bp);
+			}
+		}
+
+		return out;
+	}
+
+	@Override
+	public void invalidate()
+	{
+		if (world != null && !world.isRemote)
+		{
+			for (BlockPos p : lastBarrierSlots)
+			{
+				if (world.getBlockState(p).getBlock() == Blocks.BARRIER)
+				{
+					world.setBlockToAir(p);
+				}
+			}
+			lastBarrierSlots.clear();
+		}
+		super.invalidate();
 	}
 	
 	private void sendUpdates(Boolean markDirty)

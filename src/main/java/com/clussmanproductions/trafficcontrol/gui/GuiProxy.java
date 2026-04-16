@@ -168,6 +168,8 @@ public class GuiProxy implements IGuiHandler {
 					return new CrossingLampsGui((CrossingLampsTileEntity)world.getTileEntity(lampPos), ((BlockLampBase)world.getBlockState(lampPos).getBlock()).getLampRegistryName());
 				}
 				break;
+			case GUI_IDs.CROSSING_RELAY_SETTINGS:
+				return new CrossingRelaySettingsGui(world, new BlockPos(x, y, z));
 		}
 
 		return null;
@@ -188,5 +190,6 @@ public class GuiProxy implements IGuiHandler {
 		public static final int TRAFFIC_LIGHT_4_FRAME = 11;
 		public static final int TRAFFIC_LIGHT_6_FRAME = 12;
 		public static final int CROSSING_GATE_LAMPS = 13;
+		public static final int CROSSING_RELAY_SETTINGS = 14;
 	}
 }
