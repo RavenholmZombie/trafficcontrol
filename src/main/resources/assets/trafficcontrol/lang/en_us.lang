@@ -92,7 +92,7 @@ itemGroup.Traffic Control=Traffic Control
 
 #Keys
 key.entityclassrenderer.toggle=Toggle Entity Class Display
-key.hotreload.toggle=Hot Reload Sign Packs (F3 + Key)
+key.hotreload.toggle=Hot Reload Sign Packs
 key.trafficcontrol.category=Traffic Control
 
 #Tooltips

@@ -20,7 +20,7 @@ public class SignPackReloaderEventHandler {
 	@SubscribeEvent
 	public static void onKeyPress(RenderTickEvent e)
 	{
-		if (e.phase == Phase.END && Keyboard.isKeyDown(Keyboard.KEY_F3) && Keyboard.isKeyDown(ClientProxy.hotReloadSignPacksKey.getKeyCode()))
+		if (e.phase == Phase.END && Keyboard.isKeyDown(ClientProxy.hotReloadSignPacksKey.getKeyCode()))
 		{
 			try
 			{
