@@ -120,6 +120,8 @@ public class ModBlocks {
 
 	@ObjectHolder("gate_guard")
 	public static BlockGateGuard gate_guard;
+	@ObjectHolder("safetran_type_1")
+	public static BlockSafetranType1 safetran_type_1;
 	
 
 	@SideOnly(Side.CLIENT)
@@ -169,5 +171,6 @@ public class ModBlocks {
 		vertical_wig_wag.initModel();
 		gate_guard.initModel();
 		teardrop_bell.initModel();
+		safetran_type_1.initModel();
 	}
 }

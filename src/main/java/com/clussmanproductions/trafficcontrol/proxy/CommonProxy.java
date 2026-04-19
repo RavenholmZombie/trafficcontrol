@@ -32,6 +32,7 @@ import com.clussmanproductions.trafficcontrol.tileentity.CrossingLampsTileEntity
 import com.clussmanproductions.trafficcontrol.tileentity.PedestrianButtonTileEntity;
 import com.clussmanproductions.trafficcontrol.tileentity.RelayTileEntity;
 import com.clussmanproductions.trafficcontrol.tileentity.SafetranMechanicalTileEntity;
+import com.clussmanproductions.trafficcontrol.tileentity.SafetranType1TileEntity;
 import com.clussmanproductions.trafficcontrol.tileentity.SafetranType3TileEntity;
 import com.clussmanproductions.trafficcontrol.tileentity.ShuntBorderTileEntity;
 import com.clussmanproductions.trafficcontrol.tileentity.ShuntIslandTileEntity;
@@ -135,6 +136,7 @@ public class CommonProxy {
 		e.getRegistry().register(new BlockWCHMechanicalBell());
 		e.getRegistry().register(new BlockGateGuard());
 		e.getRegistry().register(new BlockTeardropBell());
+		e.getRegistry().register(new BlockSafetranType1());
 
 		GameRegistry.registerTileEntity(CrossingGateGateTileEntity.class, ModTrafficControl.MODID + "_crossinggategate");
 		GameRegistry.registerTileEntity(SafetranType3TileEntity.class, ModTrafficControl.MODID + "_safetrantyp3");
@@ -163,6 +165,7 @@ public class CommonProxy {
 		GameRegistry.registerTileEntity(PedestrianButtonTileEntity.class, ModTrafficControl.MODID + "_pedestrianbutton");
 		GameRegistry.registerTileEntity(VerticalWigWagTileEntity.class, ModTrafficControl.MODID + "_verticalwigwag");
 		GameRegistry.registerTileEntity(TeardropBellTileEntity.class, ModTrafficControl.MODID + "_teardropbell");
+		GameRegistry.registerTileEntity(SafetranType1TileEntity.class, ModTrafficControl.MODID + "_safetrantype1");
 	}
 
 	@SubscribeEvent
@@ -237,6 +240,7 @@ public class CommonProxy {
 		e.getRegistry().register(new ItemBlock(ModBlocks.traffic_sensor_right).setRegistryName(ModBlocks.traffic_sensor_right.getRegistryName()));
 		e.getRegistry().register(new ItemBlock(ModBlocks.gate_guard).setRegistryName(ModBlocks.gate_guard.getRegistryName()));
 		e.getRegistry().register(new ItemBlock(ModBlocks.teardrop_bell).setRegistryName(ModBlocks.teardrop_bell.getRegistryName()));
+		e.getRegistry().register(new ItemBlock(ModBlocks.safetran_type_1).setRegistryName(ModBlocks.safetran_type_1.getRegistryName()));
 	}
 
 	@SubscribeEvent
@@ -251,6 +255,7 @@ public class CommonProxy {
 		e.getRegistry().register(ModSounds.wch_mechanical_bell);
 		e.getRegistry().register(ModSounds.screwdriver);
 		e.getRegistry().register(ModSounds.teardrop_bell);
+		e.getRegistry().register(ModSounds.safetranType1Event);
 	}
 
 	public void preInit(FMLPreInitializationEvent e)
