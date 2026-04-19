@@ -33,6 +33,9 @@ tile.trafficcontrol.pedestrian_button.name=Pedestrian Button
 tile.trafficcontrol.traffic_sensor_right.name=Traffic Sensor (Right)
 tile.trafficcontrol.vertical_wig_wag.name=Upper Quadrant Wig Wag
 tile.trafficcontrol.gate_guard.name=Crossing Gate Wind Guard
+tile.trafficcontrol.teardrop_bell.name=U.S.& S. Co. Teardrop Bell
+tile.trafficcontrol.safetran_type_1.name=SafeTran Type 1 Electronic Bell
+tile.trafficcontrol.wayside_horn.name=Wayside Horn
 
 #items
 item.trafficcontrol.crossing_relay_box.name=Crossing Gate Relay

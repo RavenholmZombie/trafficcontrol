@@ -19,6 +19,11 @@
         "category": "block",
         "sounds": [ "trafficcontrol:safetran_type_1" ]
     },
+    "wayside_horn":
+    {
+        "category": "block",
+        "sounds": [ "trafficcontrol:wayside_horn" ]
+    },
     "teardrop_bell":
     {
         "category": "block",

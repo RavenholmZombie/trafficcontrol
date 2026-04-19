@@ -122,6 +122,8 @@ public class ModBlocks {
 	public static BlockGateGuard gate_guard;
 	@ObjectHolder("safetran_type_1")
 	public static BlockSafetranType1 safetran_type_1;
+	@ObjectHolder("wayside_horn")
+	public static BlockWaysideHorn wayside_horn;
 	
 
 	@SideOnly(Side.CLIENT)
@@ -172,5 +174,6 @@ public class ModBlocks {
 		gate_guard.initModel();
 		teardrop_bell.initModel();
 		safetran_type_1.initModel();
+		wayside_horn.initModel();
 	}
 }

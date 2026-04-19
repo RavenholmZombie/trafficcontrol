@@ -1,9 +1,9 @@
 {
    "type":"minecraft:crafting_shaped",
    "pattern":[
-      " I ",
-      "   ",
-      " G "
+      " N ",
+      "NGN",
+      " I "
    ],
    "key":{
       "G":{
@@ -13,10 +13,14 @@
       "I":{
          "type":"forge:ore_dict",
          "ore":"ingotIron"
+      },
+      "N":{
+        "type":"forge:ore_dict",
+        "ore":"nuggetIron"
       }
    },
    "result":{
-      "item":"trafficcontrol:safetran_type_3",
+      "item":"trafficcontrol:teardrop_bell",
       "count":1
    }
 }

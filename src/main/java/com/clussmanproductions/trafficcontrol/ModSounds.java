@@ -15,6 +15,7 @@ public class ModSounds {
 	public static SoundEvent screwdriver;
 	public static SoundEvent teardrop_bell;
 	public static SoundEvent safetranType1Event;
+	public static SoundEvent waysideHornEvent;
 	
 	public static void initSounds()
 	{
@@ -28,5 +29,6 @@ public class ModSounds {
 		screwdriver = new SoundEvent(new ResourceLocation(ModTrafficControl.MODID + ":screwdriver")).setRegistryName("trafficcontrol:screwdriver");
 		teardrop_bell = new SoundEvent(new ResourceLocation(ModTrafficControl.MODID + ":teardrop_bell")).setRegistryName("trafficcontrol:teardrop_bell");
 		safetranType1Event = new SoundEvent(new ResourceLocation(ModTrafficControl.MODID + ":safetran_type_1")).setRegistryName("trafficcontrol:safetran_type_1");
+		waysideHornEvent = new SoundEvent(new ResourceLocation(ModTrafficControl.MODID + ":wayside_horn")).setRegistryName("trafficcontrol:wayside_horn");
 	}
 }

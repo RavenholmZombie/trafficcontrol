@@ -2,7 +2,7 @@
    "type":"minecraft:crafting_shaped",
    "pattern":[
       " I ",
-      "   ",
+      " J ",
       " G "
    ],
    "key":{
@@ -13,10 +13,13 @@
       "I":{
          "type":"forge:ore_dict",
          "ore":"ingotIron"
+      },
+      "J":{
+         "item":"minecraft:noteblock"
       }
    },
    "result":{
-      "item":"trafficcontrol:safetran_type_3",
+      "item":"trafficcontrol:safetran_type_1",
       "count":1
    }
 }

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "trafficcontrol:crossing_gate_pole"
+    },
+    {
+      "item": "minecraft:noteblock"
+    }
+  ],
+  "result": {
+    "item": "trafficcontrol:wayside_horn"
+  }
+}
